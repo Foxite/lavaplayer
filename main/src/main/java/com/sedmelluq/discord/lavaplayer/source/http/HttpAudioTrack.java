@@ -2,6 +2,7 @@ package com.sedmelluq.discord.lavaplayer.source.http;
 
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerDescriptor;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.romstream.HttpInterfaceProvider;
 import com.sedmelluq.discord.lavaplayer.tools.Units;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
 import com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream;
@@ -21,7 +22,7 @@ public class HttpAudioTrack extends DelegatedAudioTrack {
   private static final Logger log = LoggerFactory.getLogger(HttpAudioTrack.class);
 
   private final MediaContainerDescriptor containerTrackFactory;
-  private final HttpAudioSourceManager sourceManager;
+  private final HttpInterfaceProvider sourceManager;
 
   /**
    * @param trackInfo Track info
@@ -29,7 +30,7 @@ public class HttpAudioTrack extends DelegatedAudioTrack {
    * @param sourceManager Source manager used to load this track
    */
   public HttpAudioTrack(AudioTrackInfo trackInfo, MediaContainerDescriptor containerTrackFactory,
-                        HttpAudioSourceManager sourceManager) {
+                        HttpInterfaceProvider sourceManager) {
 
     super(trackInfo);
 
@@ -49,7 +50,7 @@ public class HttpAudioTrack extends DelegatedAudioTrack {
     try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
       log.debug("Starting http track from URL: {}", trackInfo.identifier);
 
-      try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(trackInfo.identifier), Units.CONTENT_LENGTH_UNKNOWN)) {
+      try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(trackInfo.identifier), Units.CONTENT_LENGTH_UNKNOWN, null)) {
         processDelegate((InternalAudioTrack) containerTrackFactory.createTrack(trackInfo, inputStream), localExecutor);
       }
     }

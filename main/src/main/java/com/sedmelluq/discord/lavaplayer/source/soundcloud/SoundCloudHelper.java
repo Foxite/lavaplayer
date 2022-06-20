@@ -17,7 +17,7 @@ public class SoundCloudHelper {
   }
 
   public static String loadPlaybackUrl(HttpInterface httpInterface, String jsonUrl) throws IOException {
-    try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, URI.create(jsonUrl), null)) {
+    try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, URI.create(jsonUrl), null, null)) {
       if (!HttpClientTools.isSuccessWithContent(stream.checkStatusCode())) {
         throw new IOException("Invalid status code for soundcloud stream: " + stream.checkStatusCode());
       }

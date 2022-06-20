@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.container.MediaContainerHints;
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.ProbingAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.romstream.HttpInterfaceProvider;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.Units;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
@@ -39,7 +40,7 @@ import static com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools.getHeade
 /**
  * Audio source manager which implements finding audio files from HTTP addresses.
  */
-public class HttpAudioSourceManager extends ProbingAudioSourceManager implements HttpConfigurable {
+public class HttpAudioSourceManager extends ProbingAudioSourceManager implements HttpConfigurable, HttpInterfaceProvider {
   private final HttpInterfaceManager httpInterfaceManager;
 
   /**
@@ -126,7 +127,7 @@ public class HttpAudioSourceManager extends ProbingAudioSourceManager implements
   }
 
   private MediaContainerDetectionResult detectContainerWithClient(HttpInterface httpInterface, AudioReference reference) throws IOException {
-    try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(reference.identifier), Units.CONTENT_LENGTH_UNKNOWN)) {
+    try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(reference.identifier), Units.CONTENT_LENGTH_UNKNOWN, null)) {
       int statusCode = inputStream.checkStatusCode();
       String redirectUrl = HttpClientTools.getRedirectLocation(reference.identifier, inputStream.getCurrentResponse());
 

@@ -18,7 +18,7 @@ public class YoutubePersistentHttpStream extends PersistentHttpStream {
    * @param contentLength The length of the resource in bytes
    */
   public YoutubePersistentHttpStream(HttpInterface httpInterface, URI contentUrl, long contentLength) {
-    super(httpInterface, contentUrl, contentLength);
+    super(httpInterface, contentUrl, contentLength, null);
   }
 
   @Override

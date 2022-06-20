@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioConfiguration;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.romstream.RomStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager;
@@ -55,6 +56,7 @@ public class BotApplicationManager extends ListenerAdapter {
     playerManager.registerSourceManager(new TwitchStreamAudioSourceManager());
     playerManager.registerSourceManager(new BeamAudioSourceManager());
     playerManager.registerSourceManager(new HttpAudioSourceManager());
+    playerManager.registerSourceManager(new RomStreamAudioSourceManager());
     playerManager.registerSourceManager(new LocalAudioSourceManager());
 
     executorService = Executors.newScheduledThreadPool(1, new DaemonThreadFactory("bot"));

@@ -47,7 +47,7 @@ public class VimeoAudioTrack extends DelegatedAudioTrack {
 
       log.debug("Starting Vimeo track from URL: {}", playbackUrl);
 
-      try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, new URI(playbackUrl), null)) {
+      try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, new URI(playbackUrl), null, null)) {
         processDelegate(new MpegAudioTrack(trackInfo, stream), localExecutor);
       }
     }

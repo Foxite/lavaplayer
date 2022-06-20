@@ -74,7 +74,7 @@ public class SoundCloudAudioTrack extends DelegatedAudioTrack {
   ) throws Exception {
     log.debug("Starting SoundCloud track from URL: {}", trackUrl);
 
-    try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, new URI(trackUrl), null)) {
+    try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, new URI(trackUrl), null, null)) {
       if (!HttpClientTools.isSuccessWithContent(stream.checkStatusCode())) {
         throw new IOException("Invalid status code for soundcloud stream: " + stream.checkStatusCode());
       }

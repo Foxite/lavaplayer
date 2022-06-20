@@ -30,8 +30,8 @@ public class GetyarnAudioTrack extends DelegatedAudioTrack {
       try (PersistentHttpStream inputStream = new PersistentHttpStream(
           httpInterface,
           new URI(trackInfo.identifier),
-          Units.CONTENT_LENGTH_UNKNOWN
-      )) {
+          Units.CONTENT_LENGTH_UNKNOWN,
+		  null)) {
         processDelegate(new MpegAudioTrack(trackInfo, inputStream), localExecutor);
       }
     }

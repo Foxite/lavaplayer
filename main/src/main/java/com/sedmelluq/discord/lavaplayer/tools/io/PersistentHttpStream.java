@@ -36,17 +36,20 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
   private CloseableHttpResponse currentResponse;
   private InputStream currentContent;
   protected long position;
+  private final String authorization;
 
   /**
    * @param httpInterface The HTTP interface to use for requests
    * @param contentUrl The URL of the resource
    * @param contentLength The length of the resource in bytes
+   * @param authorization The authorization header, or null.
    */
-  public PersistentHttpStream(HttpInterface httpInterface, URI contentUrl, Long contentLength) {
+  public PersistentHttpStream(HttpInterface httpInterface, URI contentUrl, Long contentLength, String authorization) {
     super(contentLength == null ? Units.CONTENT_LENGTH_UNKNOWN : contentLength, MAX_SKIP_DISTANCE);
 
     this.httpInterface = httpInterface;
     this.contentUrl = contentUrl;
+    this.authorization = authorization;
     this.position = 0;
   }
 
@@ -91,6 +94,10 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
 
   private HttpGet getConnectRequest() {
     HttpGet request = new HttpGet(getConnectUrl());
+
+    if (authorization != null) {
+      request.setHeader("authorization", authorization);
+    }
 
     if (position > 0 && useHeadersForRange()) {
       request.setHeader(HttpHeaders.RANGE, "bytes=" + position + "-");
