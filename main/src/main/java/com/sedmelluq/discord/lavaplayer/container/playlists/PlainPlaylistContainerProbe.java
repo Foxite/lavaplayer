@@ -39,7 +39,7 @@ public class PlainPlaylistContainerProbe implements MediaContainerProbe {
   }
 
   @Override
-  public MediaContainerDetectionResult probe(AudioReference reference, SeekableInputStream inputStream) throws IOException {
+  public MediaContainerDetectionResult probe(MediaContainerHints hints, AudioReference reference, SeekableInputStream inputStream) throws IOException {
     if (!matchNextBytesAsRegex(inputStream, STREAM_SCAN_DISTANCE, linkPattern, StandardCharsets.UTF_8)) {
       return null;
     }

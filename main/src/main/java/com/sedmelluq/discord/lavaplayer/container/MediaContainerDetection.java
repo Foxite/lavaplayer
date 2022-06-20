@@ -73,7 +73,7 @@ public class MediaContainerDetection {
     for (MediaContainerProbe probe : containerRegistry.getAll()) {
       if (matchHints == probe.matchesHints(hints)) {
         innerStream.seek(0);
-        MediaContainerDetectionResult result = checkContainer(probe, reference, innerStream);
+        MediaContainerDetectionResult result = checkContainer(hints, probe, reference, innerStream);
 
         if (result != null) {
           return result;
@@ -84,11 +84,11 @@ public class MediaContainerDetection {
     return null;
   }
 
-  private static MediaContainerDetectionResult checkContainer(MediaContainerProbe probe, AudioReference reference,
-                                                              SeekableInputStream inputStream) {
+  private static MediaContainerDetectionResult checkContainer(MediaContainerHints hints, MediaContainerProbe probe,
+                                                              AudioReference reference, SeekableInputStream inputStream) {
 
     try {
-      return probe.probe(reference, inputStream);
+      return probe.probe(hints, reference, inputStream);
     } catch (Exception e) {
       log.warn("Attempting to detect file with container {} failed.", probe.getName(), e);
       return null;

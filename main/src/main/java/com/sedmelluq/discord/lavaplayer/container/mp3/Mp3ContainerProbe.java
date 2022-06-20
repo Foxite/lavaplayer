@@ -37,7 +37,7 @@ public class Mp3ContainerProbe implements MediaContainerProbe {
   }
 
   @Override
-  public MediaContainerDetectionResult probe(AudioReference reference, SeekableInputStream inputStream) throws IOException {
+  public MediaContainerDetectionResult probe(MediaContainerHints hints, AudioReference reference, SeekableInputStream inputStream) throws IOException {
     if (!checkNextBytes(inputStream, ID3_TAG)) {
       byte[] frameHeader = new byte[4];
       Mp3FrameReader frameReader = new Mp3FrameReader(inputStream, frameHeader);

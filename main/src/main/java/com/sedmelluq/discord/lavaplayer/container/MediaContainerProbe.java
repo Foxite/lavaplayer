@@ -25,6 +25,8 @@ public interface MediaContainerProbe {
    * Detect whether the file readable from the input stream is using this container and if this specific file uses
    * a format and codec that is supported for playback.
    *
+   *
+   * @param hints
    * @param reference Reference with an identifier to use in the returned audio track info
    * @param inputStream Input stream that contains the track file
    * @return Returns result with audio track on supported format, result with unsupported reason set if this is the
@@ -32,7 +34,7 @@ public interface MediaContainerProbe {
    *         null in case this file does not appear to be using this container format.
    * @throws IOException On read error.
    */
-  MediaContainerDetectionResult probe(AudioReference reference, SeekableInputStream inputStream) throws IOException;
+  MediaContainerDetectionResult probe(MediaContainerHints hints, AudioReference reference, SeekableInputStream inputStream) throws IOException;
 
   /**
    * Creates a new track for this container. The audio tracks created here are never used directly, but the playback is

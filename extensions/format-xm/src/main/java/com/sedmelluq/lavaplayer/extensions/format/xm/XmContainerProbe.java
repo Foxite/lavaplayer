@@ -30,7 +30,7 @@ public class XmContainerProbe implements MediaContainerProbe {
   }
 
   @Override
-  public MediaContainerDetectionResult probe(AudioReference reference, SeekableInputStream inputStream) throws IOException {
+  public MediaContainerDetectionResult probe(MediaContainerHints hints, AudioReference reference, SeekableInputStream inputStream) throws IOException {
     Module module;
     try {
       module = new Module(inputStream);

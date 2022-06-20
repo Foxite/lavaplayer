@@ -35,7 +35,7 @@ public class FlacContainerProbe implements MediaContainerProbe {
   }
 
   @Override
-  public MediaContainerDetectionResult probe(AudioReference reference, SeekableInputStream inputStream) throws IOException {
+  public MediaContainerDetectionResult probe(MediaContainerHints hints, AudioReference reference, SeekableInputStream inputStream) throws IOException {
     if (!checkNextBytes(inputStream, FlacFileLoader.FLAC_CC)) {
       return null;
     }

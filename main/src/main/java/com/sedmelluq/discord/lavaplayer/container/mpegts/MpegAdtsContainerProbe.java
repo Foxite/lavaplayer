@@ -31,7 +31,7 @@ public class MpegAdtsContainerProbe implements MediaContainerProbe {
   }
 
   @Override
-  public MediaContainerDetectionResult probe(AudioReference reference, SeekableInputStream inputStream)
+  public MediaContainerDetectionResult probe(MediaContainerHints hints, AudioReference reference, SeekableInputStream inputStream)
       throws IOException {
 
     SavedHeadSeekableInputStream head = inputStream instanceof SavedHeadSeekableInputStream ?

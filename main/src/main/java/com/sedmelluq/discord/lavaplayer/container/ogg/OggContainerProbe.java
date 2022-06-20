@@ -33,7 +33,7 @@ public class OggContainerProbe implements MediaContainerProbe {
   }
 
   @Override
-  public MediaContainerDetectionResult probe(AudioReference reference, SeekableInputStream stream) throws IOException {
+  public MediaContainerDetectionResult probe(MediaContainerHints hints, AudioReference reference, SeekableInputStream stream) throws IOException {
     if (!checkNextBytes(stream, OGG_PAGE_HEADER)) {
       return null;
     }
