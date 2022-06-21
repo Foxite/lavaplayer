@@ -3,7 +3,7 @@ plugins {
   `maven-publish`
 }
 
-group = "com.sedmelluq"
+group = "dev.foxite"
 
 allprojects {
   group = rootProject.group
@@ -25,11 +25,11 @@ allprojects {
   publishing {
     repositories {
       maven {
-        setUrl("s3://m2.dv8tion.net/releases")
-        credentials(AwsCredentials::class) {
-          accessKey = project.findProperty("sedmelluqMavenS3AccessKey")?.toString()
-          secretKey = project.findProperty("sedmelluqMavenS3SecretKey")?.toString()
-        }
+        setUrl("https://maven.repo.corsac.nl")
+        //credentials(AwsCredentials::class) {
+        //  accessKey = project.findProperty("sedmelluqMavenS3AccessKey")?.toString()
+        //  secretKey = project.findProperty("sedmelluqMavenS3SecretKey")?.toString()
+        //}
       }
     }
   }
