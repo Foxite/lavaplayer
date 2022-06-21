@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.apache.http.impl.client.BasicCredentialsProvider
+
 plugins {
   java
   `maven-publish`
@@ -25,11 +27,12 @@ allprojects {
   publishing {
     repositories {
       maven {
-        setUrl("https://maven.repo.corsac.nl")
-        //credentials(AwsCredentials::class) {
-        //  accessKey = project.findProperty("sedmelluqMavenS3AccessKey")?.toString()
-        //  secretKey = project.findProperty("sedmelluqMavenS3SecretKey")?.toString()
-        //}
+        name = "corsacMaven"
+        url = uri("https://maven.repo.corsac.nl/releases")
+        credentials(PasswordCredentials::class)
+        authentication {
+          create<BasicAuthentication>("basic")
+        }
       }
     }
   }
