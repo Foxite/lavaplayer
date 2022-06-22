@@ -3,6 +3,7 @@ package com.sedmelluq.discord.lavaplayer.source;
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.romstream.RomStreamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
@@ -39,6 +40,7 @@ public class AudioSourceManagers {
     playerManager.registerSourceManager(new BeamAudioSourceManager());
     playerManager.registerSourceManager(new GetyarnAudioSourceManager());
     playerManager.registerSourceManager(new HttpAudioSourceManager(containerRegistry));
+    playerManager.registerSourceManager(new RomStreamAudioSourceManager(containerRegistry));
   }
 
   /**

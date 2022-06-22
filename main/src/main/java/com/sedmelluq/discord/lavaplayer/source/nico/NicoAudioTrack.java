@@ -50,7 +50,7 @@ public class NicoAudioTrack extends DelegatedAudioTrack {
 
       log.debug("Starting NicoNico track from URL: {}", playbackUrl);
 
-      try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, new URI(playbackUrl), null)) {
+      try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, new URI(playbackUrl), null, null)) {
         processDelegate(new MpegAudioTrack(trackInfo, stream), localExecutor);
       }
     }
