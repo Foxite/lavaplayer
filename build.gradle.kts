@@ -33,6 +33,7 @@ allprojects {
         authentication {
           create<BasicAuthentication>("basic")
         }
+        println(credentials) // flooshed
       }
     }
   }
