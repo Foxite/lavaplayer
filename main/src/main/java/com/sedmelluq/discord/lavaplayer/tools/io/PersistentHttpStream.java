@@ -95,7 +95,6 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
   private HttpGet getConnectRequest() {
     HttpGet request = new HttpGet(getConnectUrl());
 
-    System.out.println(authorization);
     if (authorization != null) {
       request.setHeader(HttpHeaders.AUTHORIZATION, authorization);
     }
