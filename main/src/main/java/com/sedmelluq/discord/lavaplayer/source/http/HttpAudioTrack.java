@@ -23,19 +23,22 @@ public class HttpAudioTrack extends DelegatedAudioTrack {
 
   private final MediaContainerDescriptor containerTrackFactory;
   private final HttpInterfaceProvider sourceManager;
+  private final String authorization;
 
   /**
    * @param trackInfo Track info
    * @param containerTrackFactory Container track factory - contains the probe with its parameters.
    * @param sourceManager Source manager used to load this track
+   * @param authorization Authorization header value, or null.
    */
   public HttpAudioTrack(AudioTrackInfo trackInfo, MediaContainerDescriptor containerTrackFactory,
-                        HttpInterfaceProvider sourceManager) {
+                        HttpInterfaceProvider sourceManager, String authorization) {
 
     super(trackInfo);
 
     this.containerTrackFactory = containerTrackFactory;
     this.sourceManager = sourceManager;
+    this.authorization = authorization;
   }
 
   /**
@@ -50,7 +53,7 @@ public class HttpAudioTrack extends DelegatedAudioTrack {
     try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
       log.debug("Starting http track from URL: {}", trackInfo.identifier);
 
-      try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(trackInfo.identifier), Units.CONTENT_LENGTH_UNKNOWN, null)) {
+      try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(trackInfo.identifier), Units.CONTENT_LENGTH_UNKNOWN, authorization)) {
         processDelegate((InternalAudioTrack) containerTrackFactory.createTrack(trackInfo, inputStream), localExecutor);
       }
     }
@@ -58,7 +61,7 @@ public class HttpAudioTrack extends DelegatedAudioTrack {
 
   @Override
   protected AudioTrack makeShallowClone() {
-    return new HttpAudioTrack(trackInfo, containerTrackFactory, sourceManager);
+    return new HttpAudioTrack(trackInfo, containerTrackFactory, sourceManager, authorization);
   }
 
   @Override

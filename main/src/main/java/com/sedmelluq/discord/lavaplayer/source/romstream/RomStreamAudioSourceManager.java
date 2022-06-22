@@ -45,6 +45,7 @@ import org.dmfs.oauth2.client.http.requests.parameters.UsernameParam;
 import org.dmfs.oauth2.client.scope.BasicScope;
 import org.dmfs.rfc3986.encoding.Precoded;
 import org.dmfs.rfc3986.uris.LazyUri;
+import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
 
 import static com.sedmelluq.discord.lavaplayer.container.MediaContainerDetectionResult.refer;
@@ -66,7 +67,9 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
   private static final String REDIRECT_URL = System.getenv("ROMSTREAM_REDIRECT_URL");
 
   private final HttpInterfaceManager httpInterfaceManager;
-  private BasicOAuth2Client m_AuthClient;
+  private BasicOAuth2Client authClient;
+  private OAuth2AccessToken cachedAuthToken;
+  private CharSequence cachedAccessToken;
 
   /**
    * Create a new instance with default media container registry.
@@ -132,7 +135,7 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
   }
 
   private void initializeAuthClient() {
-    if (m_AuthClient != null) {
+    if (authClient != null) {
       return;
     }
 
@@ -143,7 +146,7 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
             new Duration(1,0,3600) /* default expiration time in case the server doesn't return any */);
 
     // Create OAuth2 client
-    m_AuthClient = new BasicOAuth2Client(
+    authClient = new BasicOAuth2Client(
             provider,
             new OAuth2ClientCredentials() {
               @Override
@@ -163,22 +166,31 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
     return new ApacheExecutor(new ValueSingle<>(getHttpInterface().getHttpClient()));
   }
 
-  private OAuth2AccessToken getAuthToken() {
+  private OAuth2AccessToken getAuthToken() throws ProtocolException, IOException, ProtocolError {
     initializeAuthClient();
 
     OAuth2Grant grant = new OAuth2Grant() {
       @Override
       public OAuth2AccessToken accessToken(HttpRequestExecutor executor) throws IOException, ProtocolError, ProtocolException {
         AuthentikMachineToMachineTokenRequest tokenRequest = new AuthentikMachineToMachineTokenRequest(new BasicScope("openid", "roles"), CLIENT_ID, BOT_USERNAME, BOT_PASSWORD);
-        return m_AuthClient.accessToken(tokenRequest, executor);
+        return authClient.accessToken(tokenRequest, executor);
       }
     };
 
     HttpRequestExecutor executor = getHttpExecutor();
+    return grant.accessToken(executor);
+  }
+
+  private String getAccessToken() {
     try {
-      return grant.accessToken(executor);
+      if (cachedAuthToken == null || cachedAuthToken.expirationDate().before(DateTime.now().addDuration(Duration.parse("PT30S")))) {
+        cachedAuthToken = getAuthToken();
+        cachedAccessToken = cachedAuthToken.accessToken();
+      }
+
+      return "Bearer " + cachedAccessToken;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new FriendlyException("Error authenticating with RomStream.", FriendlyException.Severity.FAULT, e);
     }
   }
 
@@ -212,7 +224,7 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
 
   @Override
   protected AudioTrack createTrack(AudioTrackInfo trackInfo, MediaContainerDescriptor containerDescriptor) {
-    return new HttpAudioTrack(trackInfo, containerDescriptor, this);
+    return new HttpAudioTrack(trackInfo, containerDescriptor, this, getAccessToken());
   }
 
   /**
@@ -254,12 +266,7 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
   }
 
   private MediaContainerDetectionResult detectContainerWithClient(HttpInterface httpInterface, AudioReference reference) throws IOException {
-    String authToken;
-    try {
-      authToken = "Bearer " + getAuthToken().accessToken();
-    } catch (ProtocolException e) {
-      throw new IOException(e);
-    }
+    String authToken = getAccessToken();
 
     try (PersistentHttpStream inputStream = new PersistentHttpStream(httpInterface, new URI(reference.identifier), Units.CONTENT_LENGTH_UNKNOWN, authToken)) {
       int statusCode = inputStream.checkStatusCode();
@@ -295,7 +302,7 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
     MediaContainerDescriptor containerTrackFactory = decodeTrackFactory(input);
 
     if (containerTrackFactory != null) {
-      return new HttpAudioTrack(trackInfo, containerTrackFactory, this);
+      return new HttpAudioTrack(trackInfo, containerTrackFactory, this, null);
     }
 
     return null;

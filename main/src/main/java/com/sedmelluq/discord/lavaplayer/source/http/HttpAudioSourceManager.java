@@ -85,7 +85,7 @@ public class HttpAudioSourceManager extends ProbingAudioSourceManager implements
 
   @Override
   protected AudioTrack createTrack(AudioTrackInfo trackInfo, MediaContainerDescriptor containerDescriptor) {
-    return new HttpAudioTrack(trackInfo, containerDescriptor, this);
+    return new HttpAudioTrack(trackInfo, containerDescriptor, this, null);
   }
 
   /**
@@ -161,7 +161,7 @@ public class HttpAudioSourceManager extends ProbingAudioSourceManager implements
     MediaContainerDescriptor containerTrackFactory = decodeTrackFactory(input);
 
     if (containerTrackFactory != null) {
-      return new HttpAudioTrack(trackInfo, containerTrackFactory, this);
+      return new HttpAudioTrack(trackInfo, containerTrackFactory, this, null);
     }
 
     return null;
