@@ -5,6 +5,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.ProbingAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioTrack;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.tools.JsonBrowser;
 import com.sedmelluq.discord.lavaplayer.tools.Units;
 import com.sedmelluq.discord.lavaplayer.tools.io.*;
 import com.sedmelluq.discord.lavaplayer.track.AudioItem;
@@ -16,14 +17,18 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sedmelluq.discord.lavaplayer.track.info.AudioTrackInfoBuilder;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.dmfs.httpessentials.apache4.ApacheExecutor;
 import org.dmfs.httpessentials.client.HttpRequest;
@@ -51,6 +56,7 @@ import org.dmfs.rfc5545.Duration;
 import static com.sedmelluq.discord.lavaplayer.container.MediaContainerDetectionResult.refer;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.COMMON;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.SUSPICIOUS;
+import static com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools.fetchResponseAsJson;
 import static com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools.getHeaderValue;
 
 /**
@@ -102,12 +108,36 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
     TrackQuery urlInfo = parseUrl(reference.identifier);
 
     if (urlInfo != null) {
-      // TODO query Info here and add track metadata
+      String urlPrefix;
+      String urlSuffix;
       try {
-        reference = new AudioReference(ROMSTREAM_ENDPOINT + "/Tracks/" + URLEncoder.encode(urlInfo.romName, "UTF-8") + "/Play?trackQuery=" + URLEncoder.encode(urlInfo.trackQuery, "UTF-8"), urlInfo.trackQuery);
+        urlPrefix = ROMSTREAM_ENDPOINT + "/Tracks/" + URLEncoder.encode(urlInfo.romName, "UTF-8") + "/";
+        urlSuffix = "?trackQuery=" + URLEncoder.encode(urlInfo.trackQuery, "UTF-8");
       } catch (UnsupportedEncodingException e) {
+        // Not supposed to happen
         throw new RuntimeException(e);
       }
+
+      AudioTrackInfo audioTrackInfo;
+      try {
+        String searchUrl = urlPrefix + "Search" + urlSuffix;
+        RomStreamTrackInfo trackInfo;
+        HttpGet infoRequest = new HttpGet(searchUrl);
+        infoRequest.addHeader("authorization", getAccessToken());
+        try (CloseableHttpResponse response = getHttpInterface().execute(infoRequest)) {
+          trackInfo = JsonBrowser.parse(response.getEntity().getContent()).index(0).as(RomStreamTrackInfo.class);
+        }
+
+        audioTrackInfo = AudioTrackInfoBuilder.create(reference, null)
+                .setAuthor(trackInfo.romData.fullName)
+                .setTitle(trackInfo.names[0] + " (" + trackInfo.key + ")")
+                .build();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+
+      String playUrl = urlPrefix + "Play" + urlSuffix;
+      reference = new AudioReference(playUrl, urlInfo.trackQuery);
 
       AudioReference httpReference = getAsHttpReference(reference);
       if (httpReference == null) {
@@ -115,7 +145,7 @@ public class RomStreamAudioSourceManager extends ProbingAudioSourceManager imple
       }
 
       if (httpReference.containerDescriptor != null) {
-        return createTrack(AudioTrackInfoBuilder.create(reference, null).build(), httpReference.containerDescriptor);
+        return createTrack(audioTrackInfo, httpReference.containerDescriptor);
       } else {
         return handleLoadResult(detectContainer(httpReference));
       }
