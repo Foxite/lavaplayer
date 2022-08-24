@@ -65,4 +65,14 @@ public class AudioReference implements AudioItem, AudioTrackInfoProvider {
   public String getUri() {
     return identifier;
   }
+
+  @Override
+  public int hashCode() {
+    return identifier.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj != null && obj instanceof AudioReference && identifier.equals(((AudioReference) obj).identifier);
+  }
 }

@@ -93,6 +93,7 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
   private final RemoteNodeManager remoteNodeManager;
   private final GarbageCollectionMonitor garbageCollectionMonitor;
   private final AudioPlayerLifecycleManager lifecycleManager;
+  private final AudioCache cache;
 
 
   /**
@@ -121,6 +122,8 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
     garbageCollectionMonitor = new GarbageCollectionMonitor(scheduledExecutorService);
     lifecycleManager = new AudioPlayerLifecycleManager(scheduledExecutorService, cleanupThreshold);
     lifecycleManager.initialise();
+
+    cache = new MemoryAudioCache();
   }
 
   @Override
@@ -211,10 +214,35 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
 
   private Callable<Void> createItemLoader(final AudioReference reference, final AudioLoadResultHandler resultHandler) {
     return () -> {
+      if (cache.tryGet(reference, resultHandler)) {
+        return null;
+      }
+
       boolean[] reported = new boolean[1];
 
       try {
-        if (!checkSourcesForItem(reference, resultHandler, reported)) {
+        if (!checkSourcesForItem(reference, new AudioLoadResultHandler() {
+          @Override
+          public void trackLoaded(AudioTrack track) {
+            cache.store(reference, track);
+            resultHandler.trackLoaded(track);
+          }
+
+          @Override
+          public void playlistLoaded(AudioPlaylist playlist) {
+            resultHandler.playlistLoaded(playlist);
+          }
+
+          @Override
+          public void noMatches() {
+            resultHandler.noMatches();
+          }
+
+          @Override
+          public void loadFailed(FriendlyException exception) {
+            resultHandler.loadFailed(exception);
+          }
+        }, reported)) {
           log.debug("No matches for track with identifier {}.", reference.identifier);
           resultHandler.noMatches();
         }
