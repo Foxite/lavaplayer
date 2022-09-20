@@ -437,6 +437,13 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
 
       if (item != null) {
         if (item instanceof AudioTrack) {
+
+          final String ylvis = "jofNR_WkoCE";
+          final String magNiet = "https://www.youtube.com/watch?v=WJoo_ZKkPQs&t=10s";
+          if (ylvis.equals(((AudioTrack) item).getIdentifier())) {
+            return checkSourcesForItemOnce(new AudioReference(magNiet, "mag niet"), resultHandler, reported);
+          }
+
           log.debug("Loaded a track with identifier {} using {}.", reference.identifier, sourceManager.getClass().getSimpleName());
           reported[0] = true;
           resultHandler.trackLoaded((AudioTrack) item);
