@@ -267,6 +267,8 @@ public class YoutubeAudioSourceManager implements AudioSourceManager, HttpConfig
         final String ylvis = "jofNR_WkoCE";
         if (result != null && result instanceof AudioTrack && ((AudioTrack) result).getIdentifier().equals(ylvis)) {
           return track("WJoo_ZKkPQs");
+        } else {
+          return result;
         }
       }
 
